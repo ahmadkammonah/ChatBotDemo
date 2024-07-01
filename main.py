@@ -1,53 +1,44 @@
-from streamlit_chat import message
+# Import Libraries
 import streamlit as st
+from streamlit_chat import message
 
 
-def on_input_change():
+def on_Submit():
     user_input = st.session_state.user_input
-    st.session_state.past.append({"type": "text", "data": user_input})
-    st.session_state.generated.append({"type": "text", "data": user_input})  # Echo back the user input
+    output = user_input
+    st.session_state['past'].append(user_input)
+    st.session_state['generated'].append(output)
 
+    st.session_state.user_input = ''
 
-def on_image_upload():
-    uploaded_file = st.session_state.image_uploader
-    if uploaded_file is not None:
-        pass
-        # st.session_state.past.append({"type": "image", "data": uploaded_file})
-        # st.session_state.generated.append({"type": "image", "data": uploaded_file})  # Echo back the uploaded image
-
-
-def on_btn_click():
+def on_Clear():
     del st.session_state.past[:]
     del st.session_state.generated[:]
 
 
 if __name__ == '__main__':
-    # Initialize session state if not already done
-    if 'past' not in st.session_state:
-        st.session_state['past'] = []
     if 'generated' not in st.session_state:
-        st.session_state['generated'] = []
+        st.session_state['generated'] = ["Hello ! Ask me anything 🤗"]
+    if 'past' not in st.session_state:
+        st.session_state['past'] = ["Hey ! 👋"]
 
-    st.title("ChatBot test")
+    st.title("ChatBot")
+    response_container = st.empty()
 
-    chat_placeholder = st.empty()
 
-    with chat_placeholder.container():
+    # container for the chat history
+    response_container = st.container()
+    with response_container:
         for i in range(len(st.session_state['generated'])):
-            if st.session_state['past'][i]['type'] == "text":
-                message(st.session_state['past'][i]['data'], is_user=True, key=f"{i}_user", avatar_style='no-avatar')
-            elif st.session_state['past'][i]['type'] == "image":
-                st.image(st.session_state['past'][i]['data'], caption="User", use_column_width=True,
-                         key=f"{i}_user_image")
+            message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
+            message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
 
-            if st.session_state['generated'][i]['type'] == "text":
-                message(st.session_state['generated'][i]['data'], key=f"{i}", allow_html=True, avatar_style='no-avatar')
-            elif st.session_state['generated'][i]['type'] == "image":
-                st.image(st.session_state['generated'][i]['data'], caption="Bot", use_column_width=True,
-                         key=f"{i}_bot_image")
+    # container for the user's text input
+    user_container = st.container()
+    with user_container:
+        st.button("Clear message", on_click=on_Clear)
+        st.text_input('User Input:', key='user_input', on_change=on_Submit)
 
-        st.button("Clear message", on_click=on_btn_click)
 
-    with st.container():
-        st.text_input("User Input:", on_change=on_input_change, key="user_input")
-        st.file_uploader("Upload an Image:", on_change=on_image_upload, key="image_uploader")
+
+
