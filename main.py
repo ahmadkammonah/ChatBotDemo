@@ -1,11 +1,27 @@
 # Import Libraries
 import streamlit as st
 from streamlit_chat import message
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+load_dotenv()
 
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+## function to load Gemini Pro model and get response
+model= genai.GenerativeModel("gemini-1.5-flash")
 
+#TODO: Add history funcionality
+def get_gemini_response(question, history):
+    chat = model.start_chat(history=[])
+    response=chat.send_message(question)
+    for chunk in response:
+        output = chunk.text
+    return output
+
+#TODO: Add functionality to submit images.
 def on_Submit():
     user_input = st.session_state.user_input
-    output = user_input
+    output = get_gemini_response(user_input, st.session_state['past'])
     st.session_state['past'].append(user_input)
     st.session_state['generated'].append(output)
 
